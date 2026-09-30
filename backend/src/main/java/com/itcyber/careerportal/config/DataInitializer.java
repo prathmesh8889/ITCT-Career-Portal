@@ -16,7 +16,7 @@ public class DataInitializer {
                                 @Value("${app.admin.email:admin@careerportal.local}") String email,
                                 @Value("${app.admin.password:Admin@123}") String password) {
         return args -> {
-            if (!users.existsByEmail(email.toLowerCase())) {
+            if (users.countByRole(Role.ADMIN) == 0) {
                 User admin = new User();
                 admin.setName("Portal Admin");
                 admin.setEmail(email.toLowerCase());
