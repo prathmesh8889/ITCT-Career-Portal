@@ -7,5 +7,6 @@ import java.util.List;
 public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByActiveTrueOrderByCreatedAtDesc();
     List<Job> findByCreatedByEmailOrderByCreatedAtDesc(String email);
+    List<Job> findAllByOrderByCreatedAtDesc();
     long countByActiveTrue();
 }
