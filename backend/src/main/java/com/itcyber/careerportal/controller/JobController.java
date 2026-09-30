@@ -22,20 +22,24 @@ public class JobController {
     public Job one(@PathVariable Long id) { return jobService.get(id); }
 
     @GetMapping("/mine")
-    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Job> mine(Authentication auth) { return jobService.mine(auth.getName()); }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
-    public Job create(@Valid @RequestBody JobRequest request, Authentication auth) { return jobService.create(request, auth.getName()); }
+    @PreAuthorize("hasRole('ADMIN')")
+    public Job create(@Valid @RequestBody JobRequest request, Authentication auth) {
+        return jobService.create(request, auth.getName());
+    }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Job update(@PathVariable Long id, @Valid @RequestBody JobRequest request, Authentication auth) {
         return jobService.update(id, request, auth.getName());
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
-    public void delete(@PathVariable Long id, Authentication auth) { jobService.delete(id, auth.getName()); }
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(@PathVariable Long id, Authentication auth) {
+        jobService.delete(id, auth.getName());
+    }
 }
