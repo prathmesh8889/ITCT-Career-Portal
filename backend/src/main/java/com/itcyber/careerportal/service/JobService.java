@@ -22,13 +22,16 @@ public class JobService {
 
     public List<Job> activeJobs() { return jobRepository.findByActiveTrueOrderByCreatedAtDesc(); }
 
-    public Job get(Long id) { return jobRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Job not found")); }
+    public Job get(Long id) {
+        return jobRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Job not found"));
+    }
 
-    public List<Job> mine(String email) { return jobRepository.findByCreatedByEmailOrderByCreatedAtDesc(email); }
+    public List<Job> mine(String email) {
+        return jobRepository.findByCreatedByEmailOrderByCreatedAtDesc(email);
+    }
 
     public Job create(JobRequest req, String email) {
-        User creator = userRepository.findByEmail(email).orElseThrow();
-        if (creator.getRole() == Role.CANDIDATE) throw new AccessDeniedException("Only recruiter/admin can post jobs");
+        User creator = requireAdmin(email);
         Job job = new Job();
         apply(job, req);
         job.setCreatedBy(creator);
@@ -36,15 +39,15 @@ public class JobService {
     }
 
     public Job update(Long id, JobRequest req, String email) {
+        requireAdmin(email);
         Job job = get(id);
-        assertOwnerOrAdmin(job, email);
         apply(job, req);
         return jobRepository.save(job);
     }
 
     public void delete(Long id, String email) {
+        requireAdmin(email);
         Job job = get(id);
-        assertOwnerOrAdmin(job, email);
         job.setActive(false);
         jobRepository.save(job);
     }
@@ -54,6 +57,14 @@ public class JobService {
         if (actor.getRole() != Role.ADMIN && !job.getCreatedBy().getEmail().equalsIgnoreCase(email)) {
             throw new AccessDeniedException("Not allowed for this job");
         }
+    }
+
+    private User requireAdmin(String email) {
+        User actor = userRepository.findByEmail(email).orElseThrow();
+        if (actor.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Only admin can manage job posts");
+        }
+        return actor;
     }
 
     private void apply(Job job, JobRequest req) {
